@@ -14,6 +14,7 @@ import com.chagok.domain.AbookVO;
 import com.chagok.domain.BoardVO;
 import com.chagok.domain.BusinessAccountVO;
 import com.chagok.domain.ChallengeVO;
+import com.chagok.domain.CommentVO;
 import com.chagok.domain.Criteria;
 import com.chagok.domain.MinusVO;
 import com.chagok.domain.PlusVO;
@@ -189,6 +190,44 @@ public class BoardServiceImpl implements BoardService{
 	public List<BoardVO> getAllboardList(Criteria cri) throws Exception {
 		
 		return dao.getAllboardList(cri);
+	}
+
+	// 댓글 조회(유저프로필+페이징처리)
+	@Override
+//	public List<CommentVO> getComment(Integer bno) throws Exception {
+	public List<CommentVO> getComment(Criteria cri,Integer bno) throws Exception {
+		mylog.debug("BoardServiceImpl 댓글 조회");
+		return dao.getComment(cri,bno);
+	}
+
+	// 댓글 수정
+	@Override
+	public Integer updateComment(CommentVO CV) throws Exception {
+		
+		return dao.updateComment(CV);
+	}
+
+	// 댓글 삭제
+	@Override
+	public void deleteComment(CommentVO CV) throws Exception {
+		
+		dao.deleteComment(CV);
+		
+	}
+
+	// 댓글 작성
+	@Override
+	public void insertComment(CommentVO CV) throws Exception {
+		
+		dao.insertComment(CV);
+		
+	}
+
+	// 댓글 총 갯수(해당 글번호)
+	@Override
+	public Integer countingCM(Integer bno) throws Exception {
+		
+		return dao.countingCM(bno);
 	}
 	
 	

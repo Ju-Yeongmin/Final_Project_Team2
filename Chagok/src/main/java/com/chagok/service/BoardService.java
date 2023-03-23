@@ -8,6 +8,7 @@ import com.chagok.domain.AbookVO;
 import com.chagok.domain.BoardVO;
 import com.chagok.domain.BusinessAccountVO;
 import com.chagok.domain.ChallengeVO;
+import com.chagok.domain.CommentVO;
 import com.chagok.domain.Criteria;
 import com.chagok.domain.MinusVO;
 import com.chagok.domain.PlusVO;
@@ -84,5 +85,22 @@ public interface BoardService {
 	
 	// 전체 게시판 조회
 	public List<BoardVO> getAllboardList(Criteria cri) throws Exception;
+	
+	// 댓글 조회(유저프로필+페이징처리)
+//	public List<CommentVO> getComment(Integer bno) throws Exception;
+	public List<CommentVO> getComment(Criteria cri,Integer bno) throws Exception;
+	
+	// 댓글 수정
+	public Integer updateComment(CommentVO CV) throws Exception;
+		
+	// 댓글 삭제
+	public void deleteComment(CommentVO CV) throws Exception;
+	
+	// 댓글 작성
+	public void insertComment(CommentVO CV) throws Exception;
+	
+	// 댓글 갯수 (해당 글번호)
+	public Integer countingCM(Integer bno) throws Exception;
+	
 }
 

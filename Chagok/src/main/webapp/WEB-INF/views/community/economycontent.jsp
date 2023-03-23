@@ -9,7 +9,6 @@
 <html lang="ko">
 
 
-<!-- 로딩 코드 start -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <style type="text/css">
 #waiting {
@@ -63,16 +62,26 @@
 			});
 </script> 	
 
-<script type="text/javascript">
-	function back(){
-		window.history.back();
-	}
+<!-- <script type="text/javascript"> -->
+
+<!--  		$(document).ready(function(){ -->
+<!--  			var fun01 = $("form[role='form']"); -->
+				
+<!--  			$("fun01").click(function(){ -->
+<!--  				formObj.attr("action","/insertcomment"); -->
+<!--  				formObj.submit(); -->
+<!--  			}); -->
+			
+<!--  			location.reload();	 -->
+<!--  		}); -->
 	
-</script>
+	
+<!-- </script> -->
+
 	
 </head>	
 <body>
-
+${nick }
 <!-- <form role="form" method="post"> -->
 <%-- 	<input type="hidden" name="bno" value="${vo.bno }"> --%>
 <!-- </form> -->
@@ -112,9 +121,14 @@
                 </div>
                 <div class="cont">
                     <textarea name="b_content"  style="resize: none;" readonly placeholder="내용을 작성해주세요">${vo.b_content }</textarea>
+                    <div class="bt_wrap">
+	                    <input class="sbtn" type=button value="좋아요">
+    	                <input class="sbtn2" type=button value="싫어요">
+    	                
+                    </div>
                 </div>
             </div>
-            
+           
             <div class="bt_wrap">
                 	<input class="sbtn" type="button" value="목록" onclick="back()" >
 <!--                 <a href="notice" class="on">목록</a> -->
@@ -124,8 +138,96 @@
             	    <input class="sbtn2" type="submit" value="삭제하기" onclick="location.href='/economydelete?bno=${vo.bno}';">
                 </c:if>
             </div>
-        </div>
-     
+            <br>
+            <div class="board_write">
+                <div class="title">
+            		<dl>
+            			<dt>전체 댓글 [${CM }]</dt>
+            		</dl>
+                </div>
+                <c:forEach items="${CV }" var="CV">
+                <div class="info">
+                     <dl>
+                     	<dt>작성자</dt>
+                        <dd>${CV.cm_nick }</dd>
+                        <dd><br></dd>
+                    </dl>
+                    <dl>
+                    	<dd><br> </dd>
+                        <dd style="float:right;"><fmt:formatDate value="${CV.cm_regdate }" pattern="yyyy-MM-dd HH:mm:ss"/></dd>
+                    </dl>
+                    <br>
+                   <br>
+                    <dl>
+                        <dd>${CV.cm_content }</dd>
+                    </dl>
+                    <br>
+						<dl>
+                    <c:set var="cnick" value="${CV.cm_nick }"/>
+                    <c:if test="${nick == '관리자' || nick == cnick}">
+							<dd>
+								<button type="submit" class="btn" value="수정"  style="background-color:#66BB7A;"
+								onclick="location.href='/updatecomment?cm_cbno=${CV.cm_cbno}';">수정</button>
+								
+								<button type="submit" class="btn" value="삭제"  style="background-color:#dd4b39;"
+								onclick="location.href='/deletecomment?cm_cbno=${CV.cm_cbno}';">삭제</button>
+								
+                    		</dd>
+					</c:if>
+				</dl>
+				<br>
+				<dl>
+					<dd style="float:left;">
+					<button type="submit" class="btn" value="댓글 달기" style="background-color:#FFDB83;"
+					onclick="location.href='/recommentwrite';">댓글 달기</button>
+					</dd>
+				</dl>
+                </div>
+                </c:forEach>
+                
+                <div class="board_page" style="text-align:center;">
+                	<ul class= "pagination pagination-sm no-margin pull-center">
+<!--                 <a href="#" class="bt first"><<</a> -->
+                	<c:if test="${pageMaker.prev }">
+					<li><a href="/economy?page=${pageMaker.startPage-1 }"class="bt prev"><</a></li>
+					</c:if>
+               <c:forEach var="idx" begin="${pageMaker.startPage }" end="${pageMaker.endPage }" step="1">
+					<li 
+						<c:out value="${idx == pageMaker.cri.page? 'class=active':'' }"/>
+						><a href="/economy?page=${idx }" class="num">${idx }</a></li>
+				</c:forEach>
+                <c:if test="${pageMaker.next }">
+					<li><a href="/economy?page=${pageMaker.endPage+1 }" class="bt next">></a></li>
+				</c:if>
+<!--                 <a href="#" class="bt last">>></a> -->
+                </ul>
+                
+         </div>
+            </div>
+            <br>
+             <form role="form" action="/insertcomment" method="post">
+            <div class="board_write">
+             <div class="title"  >
+             		<dl>
+             			<dt>댓글 내용 작성</dt>
+             		</dl>
+             	 	<dl>
+                        <dt>작성자</dt>
+                        <dd><input type="text" name="cm_nick" style="width:20%;" value="${nick }" readonly></dd>
+                    </dl>
+             	 <div class="cont">
+                    <textarea name="cm_content"  style="resize: none; width:100%; height:100%;" placeholder="댓글을 작성해주세요"></textarea>
+                </div>
+            <div class="bt_wrap"> 
+            	<input class="sbtn" type="submit"  value="등록하기">
+				<input type="hidden" name="bno" value="${vo.bno }">
+            </div>
+             </div>
+			</div>
+            </form>
+            
+         </div>
+        
 
 </body>
 </html>

@@ -10,15 +10,18 @@ import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.chagok.domain.BoardVO;
 import com.chagok.domain.ChallengeVO;
+import com.chagok.domain.CommentVO;
 import com.chagok.domain.Criteria;
 import com.chagok.domain.PageMaker;
 import com.chagok.service.BoardService;
@@ -41,6 +44,7 @@ public class BoardController {
 	
 	@Resource(name="uploadPath")
 	private String uploadPath;
+	
 	
 	// =================================================================================
 	// 후기글 리스트 (b_sort=1)
@@ -148,17 +152,21 @@ public class BoardController {
 	// 후기글 상세
 	// http://localhost:8080/reviewcontent?bno=1
 	@GetMapping(value = "/reviewcontent")
-	public String reviewcontentGET(HttpSession session,Model model,@RequestParam("cno") int cno,Integer bno) throws Exception {
+	public String reviewcontentGET(HttpSession session,Model model,@RequestParam("cno") int cno,Integer bno,Criteria cri) throws Exception {
 		Map<String, Object> boardChallenge = Bservice.getBoardChallenge(bno);
 		Integer Success = service.getSuccess(cno);
 
 		ChallengeVO vo = service.getChallengeInfo(cno);
+		List<CommentVO> CV = Bservice.getComment(cri,bno);
+		Integer CM = Bservice.countingCM(bno);
 		
 		List<ChallengeVO> challengeList = service.getChallengeList(cno);
 		int CList = service.getCList(cno);
 		ChallengeVO vo2 = service.getCt_top(cno);
 		List<Map<String, Object>> result = service.getResult(cno);
 		
+		model.addAttribute("CV",CV);
+		model.addAttribute("CM",CM);
 		model.addAttribute("vo", vo);
 		model.addAttribute("challengeList", challengeList);
 		model.addAttribute("c_end", service.getChallengeEndDate(cno));
@@ -172,6 +180,7 @@ public class BoardController {
 		return "/community/reviewcontent";
 	}
 	// =================================================================================
+	
 	
 	// =================================================================================
 	// 공지 글 리스트 (b_sort=2)
@@ -357,7 +366,8 @@ public class BoardController {
 	// 경제 게시판 보드
 	@GetMapping(value = "/economy")
 	public String EconomyGET(HttpSession session,Model model,Criteria cri) throws Exception {
-		List<BoardVO> boardList = Bservice.getEBoardPage(cri);	
+		List<BoardVO> boardList = Bservice.getEBoardPage(cri);
+		
 		Integer count = Bservice.EboardCount();
 		
 		PageMaker pageMaker = new PageMaker();
@@ -396,12 +406,21 @@ public class BoardController {
 	// 경제 글 상세
 	// http://localhost:8080/economycontent
 	@GetMapping(value = "/economycontent")
-	public String economycontentGET(HttpSession session,Model model,@RequestParam("bno") int bno,Integer cno) throws Exception {
+	public String economycontentGET(HttpSession session,Model model,@RequestParam("bno") int bno,Criteria cri) throws Exception {
 				
 		BoardVO vo = Bservice.getBoardContent(bno);
+		List<CommentVO> CV = Bservice.getComment(cri,bno);
+		Integer CM = Bservice.countingCM(bno);
 		
+		model.addAttribute("CM",CM);
 		model.addAttribute("vo",vo);
+		model.addAttribute("CV",CV);
 		
+		PageMaker pageMaker = new PageMaker();
+		cri.setPerPageNum(10);
+		pageMaker.setDisplayPageNum(10);
+		pageMaker.setCri(cri);
+		model.addAttribute("pageMaker", pageMaker);
 			
 		return "/community/economycontent";
 	}	
@@ -441,7 +460,7 @@ public class BoardController {
 			
 		Bservice.deleteBoard(bno);
 					
-		rttr.addFlashAttribute("result", "delOK");
+		rttr.addFlashAttribute("result", "createOK");
 					
 		return "redirect:/economy?page=1";
 	}	
@@ -465,5 +484,59 @@ public class BoardController {
 //	    }
 
 	
+	// =================================================================================
+	
+	// =================================================================================
+	// 댓글 작성
+//	@ResponseBody
+	@PostMapping(value = "/insertcomment")
+	public String insertcommentGET(CommentVO CV,RedirectAttributes rttr,HttpSession session,HttpServletRequest request) throws Exception {
+			
+		Bservice.insertComment(CV);
+					
+		rttr.addFlashAttribute("result", "delOK");
+					
+		String referer = request.getHeader("Referer"); // 헤더에서 이전 페이지를 읽는다.
+		
+		return "redirect:"+ referer; // 이전 페이지로 리다이렉트
+//		return "";
+	}	
+	
+	// 댓글 수정
+	@GetMapping(value = "/updatecomment")
+	public String updatecommentGET(CommentVO CV,RedirectAttributes rttr,HttpSession session,HttpServletRequest request) throws Exception {
+		
+		Bservice.updateComment(CV);
+		
+		rttr.addFlashAttribute("result", "upOK");
+		
+		String referer = request.getHeader("Referer"); // 헤더에서 이전 페이지를 읽는다.
+		
+		return "redirect:"+ referer; // 이전 페이지로 리다이렉트
+//		return "";
+	}	
+	
+	// 댓글 삭제
+	@GetMapping(value = "/deletecomment")
+	public String deletecommentGET(CommentVO CV,RedirectAttributes rttr,HttpSession session,HttpServletRequest request) throws Exception {
+		
+		Bservice.deleteComment(CV);
+		
+		rttr.addFlashAttribute("result", "delOK");
+		
+		String referer = request.getHeader("Referer"); // 헤더에서 이전 페이지를 읽는다.
+		
+		return "redirect:"+ referer; // 이전 페이지로 리다이렉트
+//		return "";
+	}	
+	
+	// 대댓글작성
+	@ResponseBody
+	@GetMapping(value = "/comment")
+	public String getComment(CommentVO CV) throws Exception {
+		
+		
+		return "";
+	}
 	
 }

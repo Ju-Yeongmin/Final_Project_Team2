@@ -1,5 +1,7 @@
 package com.chagok.persistence;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +18,7 @@ import com.chagok.domain.AbookVO;
 import com.chagok.domain.BoardVO;
 import com.chagok.domain.BusinessAccountVO;
 import com.chagok.domain.ChallengeVO;
+import com.chagok.domain.CommentVO;
 import com.chagok.domain.Criteria;
 import com.chagok.domain.MinusVO;
 import com.chagok.domain.PlusVO;
@@ -201,6 +204,9 @@ public class BoardDAOImpl implements BoardDAO{
 //	public List<Map<String, Object>> getMyBoardWrite(String nick,Criteria cri) throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>();
 //		return sqlSession.selectList(NAMESPACE + ".myBoardWrite",nick);
+//		map.put("nick", nick);
+//		map.put("pageStart", cri.getPageStart());
+//		map.put("perPageNum", cri.getPerPageNum());
 		map.put("nick", nick);
 		map.put("pageStart", cri.getPageStart());
 		map.put("perPageNum", cri.getPerPageNum());
@@ -221,6 +227,52 @@ public class BoardDAOImpl implements BoardDAO{
 	public List<BoardVO> getAllboardList(Criteria cri) throws Exception {
 		
 		return sqlSession.selectList(NAMESPACE+".AllboardList");
+	}
+
+	// 댓글 조회
+	@Override
+//	public List<CommentVO> getComment(Integer bno) {
+//	mylog.debug("BoardDAOImpl 댓글조회");
+//	return sqlSession.selectList(NAMESPACE+".comment",map);
+//}
+	
+//	public Map<String, Object> getComment(Criteria cri,Integer bno) {
+	public List<CommentVO> getComment(Criteria cri,Integer bno) {
+		mylog.debug("BoardDAOImpl 댓글조회");
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("bno", bno);
+		map.put("pageStart", cri.getPageStart());
+		map.put("perPageNum", cri.getPerPageNum());
+		return sqlSession.selectList(NAMESPACE+".comment",map);
+		
+	}
+
+	// 댓글 수정
+	@Override
+	public Integer updateComment(CommentVO CV) throws Exception {
+		
+		return sqlSession.update(NAMESPACE+".updateComment", CV);
+	}
+
+	// 댓글 삭제
+	@Override
+	public void deleteComment(CommentVO CV) throws Exception {
+		
+		sqlSession.delete(NAMESPACE+".deleteComment",CV);
+	}
+
+	// 댓글 작성
+	@Override
+	public void insertComment(CommentVO CV) throws Exception {
+		
+		sqlSession.insert(NAMESPACE+".insertComment", CV);
+	}
+
+	// 댓글 갯수(해당 글번호)
+	@Override
+	public Integer countingCM(Integer bno) throws Exception {
+		
+		return sqlSession.selectOne(NAMESPACE+".countingCM",bno);
 	}
 	
 	

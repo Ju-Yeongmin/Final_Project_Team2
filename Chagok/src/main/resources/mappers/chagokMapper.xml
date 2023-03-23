@@ -617,11 +617,17 @@
 <!-- 		from board -->
 <!-- 		where b_writer = #{nick} -->
 <!-- 	</select> -->
+<!-- 	<select id="myBoardWriteCnt" resultType="Integer"> -->
+<!-- 		select count(*) from board b inner join user u -->
+<!-- 		on b.b_writer = u.nick -->
+<!--    		where b.b_writer like concat('%',#{nick},'%') -->
+<!-- 	</select> -->
 	<select id="myBoardWriteCnt" resultType="Integer">
-		select count(*) from board b inner join user u
-		on b.b_writer = u.nick
-   		where b.b_writer like concat('%',#{nick},'%')
+    select count(*) as cnt from board b inner join user u
+    on b.b_writer = u.nick
+    where b.b_writer like concat('%',#{nick},'%')
 	</select>
+	
 
 	<!-- ctno만 가져오기 -->
 	<select id="getCtno" resultType="Integer">
@@ -695,11 +701,41 @@
 	</update>
   	
   	<!-- 댓글 리스트 조회 -->
-  	<select id="">
+<!--   	<select id="comment" resultType="com.chagok.domain.CommentVO"> -->
+<!--   		select * from comment -->
+<!--   		where bno = #{bno} -->
   	
-  	
+<!--   	</select> -->
+  	<select id="comment" resultType="map">
+  		select * from comment c inner join user u
+		on c.cm_nick = u.nick
+		limit #{pageStart}, #{perPageNum};
   	</select>
   	
+  	<!-- 댓글 수정 -->
+	<update id="updateComment">
+		update board set cm_nick=#{cm_nick},cm_content=#{cm_content}
+		where bno = #{bno}
+	</update>
+	
+	<!-- 댓글 삭제 -->
+	<delete id="deleteComment">
+		delete from comment
+		where cm_cbno = #{cbno}
+	</delete>
+	
+	<!-- 댓글 작성  -->
+	<insert id = "insertComment">
+		insert into comment (cm_nick,cm_content,bno)
+		values (#{cm_nick},#{cm_content},#{bno})	
+	</insert>
+  	
+  	<!-- 댓글 갯수 -->
+  	<select id="countingCM" resultType="Integer">
+  		select count(*) from comment
+		where bno = #{bno} 
+  	</select>
+  	 
   	<!-- 모든 게시판 페이징(후기) -->
   	<select id="MrboardPageNo" resultType="com.chagok.domain.BoardVO">
 	  	select * from board b inner join challenge c
@@ -730,4 +766,16 @@
 		order by bno desc, b_date desc
 		limit #{pageStart},5
 	</select>	
+	
+	<!-- 좋아요 누름 유무 -->
+	<select id="findLike" resultType="Integer">
+		select count(*) from vegan_like where bno = #{bno} and like_nick = #{like_nick}
+	</select>
+	
+	<!-- 좋아요 1 증가 카운팅 -->
+	<insert id="likeUp">
+		insert into vegan_like (like_no ,bno , like_nick, board_like)
+		values((select * from (select max(like_no)+1 from vegan_like) next), #{bno},#{like_nick},1)
+	</insert>
+	
  </mapper>
